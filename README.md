@@ -42,9 +42,4 @@ Ils peuvent soumettre de nouvelles propositions lors d'une session d'enregistrem
 
 ## TODO
 
-- tester via truffle console addVoter (ajouter 3 adresses)
-- tester via truffle console le début d'un session d'enregistrement
-- tester via truffle console de soumettre une propral par adresse (https://www.trufflesuite.com/docs/truffle/getting-started/interacting-with-your-contracts#making-a-transaction)
-- tester via truffle console de clôturer une sessiond d'enregistrement
-
 - créer des tests https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-solidity

@@ -3,7 +3,15 @@ pragma solidity ^0.8.10;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-// let instance = await Voting.deployed()
+// let instance = await Voting.deployed();
+// instance.addVoter(accounts[1]);instance.addVoter(accounts[2]);instance.addVoter(accounts[3]);
+// instance.getWhitelistedVoters();
+// instance.startProposalSession();
+// instance.submitProposal("coucou 1", {from: accounts[1]});
+// instance.submitProposal("coucou 2", {from: accounts[2]});
+// instance.submitProposal("coucou 3", {from: accounts[3]});
+// instance.endProposalSession();
+
 contract Voting is Ownable {
     event VoterRegistered(address voterAddress);
     event WorkflowStatusChange(
@@ -35,17 +43,13 @@ contract Voting is Ownable {
 
     uint256 public winningProposalId;
 
-    WorkflowStatus public state;
+    WorkflowStatus public state = WorkflowStatus.RegisteringVoters;
 
     address[] private whiteListedVoters;
     mapping(address => Voter) private addressToVoter;
 
     Proposal[] private proposals;
     mapping(uint256 => address) private proposalToOwner;
-
-    constructor() {
-        state = WorkflowStatus.RegisteringVoters;
-    }
 
     function addVoter(address _voterAddress) public onlyOwner {
         require(
@@ -72,7 +76,7 @@ contract Voting is Ownable {
         );
 
         WorkflowStatus oldStatus = state;
-        state = WorkflowStatus.VotingSessionStarted;
+        state = WorkflowStatus.ProposalsRegistrationStarted;
 
         emit WorkflowStatusChange(oldStatus, state);
     }
@@ -96,21 +100,18 @@ contract Voting is Ownable {
     }
 
     function endProposalSession() public onlyOwner {
+        require(proposals.length > 1, "The proposals list is empty !");
         require(
             state == WorkflowStatus.ProposalsRegistrationStarted,
             "You can no longer end the proposal session."
         );
-        require(proposals.length > 1, "The proposals list is empty !");
 
         WorkflowStatus oldStatus = state;
-        state = WorkflowStatus.VotingSessionEnded;
+        state = WorkflowStatus.ProposalsRegistrationEnded;
 
         emit WorkflowStatusChange(oldStatus, state);
     }
 
-    /**
-     * @dev Get the list of all whitelisted addresses
-     */
     function getWhitelistedVoters() public view returns (address[] memory) {
         return whiteListedVoters;
     }
