@@ -89,7 +89,7 @@ contract Voting is Ownable {
 
         require(
             addressToVoter[msg.sender].isRegistered == true,
-            "Submit denied because participant does not belong to registered voters."
+            "Submit denied because address does not belong to registered voters."
         );
 
         proposals.push(Proposal(_description, 0));
@@ -117,6 +117,16 @@ contract Voting is Ownable {
     }
 
     function getVoterVote(address voterAddress) public view returns (uint256) {
+        require(
+            addressToVoter[msg.sender].isRegistered == true,
+            "This address does not belong to registered voters."
+        );
+
+        require(
+            addressToVoter[msg.sender].hasVoted == true,
+            "Vote not submitted yet."
+        );
+
         return addressToVoter[voterAddress].votedProposalId;
     }
 
