@@ -5,7 +5,7 @@ const {
 
 const Voting = artifacts.require("Voting");
 
-contract("Voter registration", async accounts => {
+contract("Voters registration", async accounts => {
     beforeEach(async () => {
         this.instance = await Voting.new();
     });
@@ -17,7 +17,7 @@ contract("Voter registration", async accounts => {
     const voter3 = accounts[3];
     const voter4 = accounts[4];
 
-    it.only("Can add new voters to the whitelist only by admin (owner of contract).", async () => {
+    it("Can add new voters to the whitelist only by admin (owner of contract).", async () => {
         await this.instance.addVoter(voter1)
         await this.instance.addVoter(voter2)
         await this.instance.addVoter(voter3)
@@ -29,6 +29,11 @@ contract("Voter registration", async accounts => {
         assert.equal(whiteListedVoters[0], voter1);
         assert.equal(whiteListedVoters[1], voter2);
         assert.equal(whiteListedVoters[2], voter3);
+    });
+
+    it("Should not be able to add invalid ETH address.", async () => {
+        const invalidVoter = "0x0000000000000000000000000000000000000000";
+        await expectRevert(this.instance.addVoter(invalidVoter), "You must add a valid ETH address.");
     });
 
     it("Should not be able to add new voter to the whitelist as non admin.", async () => {
