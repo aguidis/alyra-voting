@@ -33,11 +33,18 @@ contract("Voters registration", async accounts => {
 
     it("Should not be able to add invalid ETH address.", async () => {
         const invalidVoter = "0x0000000000000000000000000000000000000000";
-        await expectRevert(this.instance.addVoter(invalidVoter), "You must add a valid ETH address.");
+
+        await expectRevert(
+            this.instance.addVoter(invalidVoter),
+            "You must add a valid ETH address."
+        );
     });
 
     it("Should not be able to add new voter to the whitelist as non admin.", async () => {
-        await expectRevert(this.instance.addVoter(voter1, { from: randomUser }), "Ownable: caller is not the owner");
+        await expectRevert(
+            this.instance.addVoter(voter1, { from: randomUser }),
+            "Ownable: caller is not the owner"
+        );
     });
 
     it("Should not be able to add new voter if proposals registration started.", async () => {
@@ -47,13 +54,19 @@ contract("Voters registration", async accounts => {
 
         await this.instance.startProposalSession()
 
-        await expectRevert(this.instance.addVoter(voter4), "You can no longer add voters.");
+        await expectRevert(
+            this.instance.addVoter(voter4),
+            "You can no longer add voters."
+        );
     })
 
     it("Cannot add twice the same voter.", async () => {
         await this.instance.addVoter(voter1)
 
-        await expectRevert(this.instance.addVoter(voter1), "Voter already added.");
+        await expectRevert(
+            this.instance.addVoter(voter1),
+            "Voter already added."
+        );
     });
 
     it("Should fire 'VoterRegistered' event after registration.", async () => {

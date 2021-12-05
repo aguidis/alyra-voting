@@ -41,7 +41,9 @@ contract Voting is Ownable {
         uint256 voteCount;
     }
 
+    uint256 public totalVotes;
     uint256 public winningProposalId;
+    uint256[] public proposalVoteCountEqualities;
 
     WorkflowStatus public state;
 
@@ -100,6 +102,13 @@ contract Voting is Ownable {
             "Submit denied because participant does not belong to registered voters."
         );
 
+        // https://ethereum.stackexchange.com/questions/30912/how-to-compare-strings-in-solidity/82739
+        string memory empty = "";
+        require(
+            keccak256(bytes(_description)) != keccak256(bytes(empty)),
+            "Proposal can't be empty."
+        );
+
         proposals.push(Proposal(_description, 0));
         uint256 proposalId = proposals.length - 1;
 
@@ -152,19 +161,13 @@ contract Voting is Ownable {
             "You are not registered for voting."
         );
 
-        Proposal storage proposal = proposals[_proposalId];
-
-        // https://ethereum.stackexchange.com/questions/30912/how-to-compare-strings-in-solidity/82739
-        string memory empty = "";
-        require(
-            keccak256(bytes(proposal.description)) == keccak256(bytes(empty)),
-            "Proposal does not exist."
-        );
+        Proposal storage votedProposal = proposals[_proposalId];
 
         currentVoter.votedProposalId = _proposalId;
         currentVoter.hasVoted = true;
 
-        proposal.voteCount++;
+        votedProposal.voteCount++;
+        totalVotes++;
 
         emit Voted(msg.sender, _proposalId);
     }
@@ -175,11 +178,43 @@ contract Voting is Ownable {
             "You can no longer end the voting session."
         );
 
-        // check si une proposal a au moins un vote
-        // check si il y a egalite
+        require(totalVotes != 0, "Nobody has voted yet.");
 
         WorkflowStatus oldStatus = state;
         state = WorkflowStatus.VotingSessionEnded;
+
+        emit WorkflowStatusChange(oldStatus, state);
+    }
+
+    function tallyingVotes() public onlyOwner {
+        require(
+            state == WorkflowStatus.VotingSessionEnded,
+            "You can no longer tailling the votes."
+        );
+
+        for (uint256 i = 0; i < proposals.length; i++) {
+            Proposal memory currentProposal = proposals[i];
+
+            if (winningProposalId == 0) {
+                winningProposalId = i;
+                continue;
+            }
+
+            Proposal memory tempWinningProposal = proposals[winningProposalId];
+
+            if (currentProposal.voteCount > tempWinningProposal.voteCount) {
+                winningProposalId = i;
+
+                delete proposalVoteCountEqualities;
+            }
+
+            if (currentProposal.voteCount == tempWinningProposal.voteCount) {
+                proposalVoteCountEqualities.push(i);
+            }
+        }
+
+        WorkflowStatus oldStatus = state;
+        state = WorkflowStatus.VotesTallied;
 
         emit WorkflowStatusChange(oldStatus, state);
     }
@@ -212,5 +247,19 @@ contract Voting is Ownable {
         returns (Proposal memory)
     {
         return proposals[_proposalId];
+    }
+
+    function getWinner() public view returns (Proposal memory) {
+        require(
+            state == WorkflowStatus.VotesTallied,
+            "The winning proposal is not defined yet."
+        );
+
+        require(
+            proposalVoteCountEqualities.length == 0,
+            "There is an equality between some proposals."
+        );
+
+        return proposals[winningProposalId];
     }
 }

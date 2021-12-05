@@ -22,7 +22,15 @@ contract("Proposals registration", async accounts => {
         await this.instance.addVoter(voter1)
         await this.instance.addVoter(voter2)
 
-        this.instance.startProposalSession();
+        const receipt = await this.instance.startProposalSession();
+
+        expectEvent(receipt, 'WorkflowStatusChange', {
+            previousStatus: new BN(0),
+            newStatus: new BN(1)
+        });
+
+        const state = await this.instance.state();
+        assert.equal(state, 1);
     });
 
     it("Should not be able to start as non admin.", async () => {
@@ -44,6 +52,18 @@ contract("Proposals registration", async accounts => {
         assert.equal(proposals[0].description, "13ème mois obligatoire.");
     });
 
+    it("Should not be able to add empty proposal.", async () => {
+        await this.instance.addVoter(voter1)
+        await this.instance.addVoter(voter2)
+
+        await this.instance.startProposalSession();
+
+        await expectRevert(
+            this.instance.submitProposal("", { from: voter1 }),
+            "Proposal can't be empty."
+        );
+    })
+
     it("Should not be able to add proposals if proposals registration ended.", async () => {
         await this.instance.addVoter(voter1)
         await this.instance.addVoter(voter2)
@@ -56,7 +76,9 @@ contract("Proposals registration", async accounts => {
         await this.instance.endProposalSession()
 
         await expectRevert(
-            this.instance.submitProposal("Des frites à la cantine."), "You can no longer submit a proposal.");
+            this.instance.submitProposal("Des frites à la cantine."),
+            "You can no longer submit a proposal."
+        );
     })
 
     it("Should not be able to submit proposal if participant not registred as voter.", async () => {
@@ -71,7 +93,7 @@ contract("Proposals registration", async accounts => {
         );
     });
 
-    it.only("Should fire 'VoterRegistered' event after registration.", async () => {
+    it("Should fire 'ProposalRegistered' event after registration.", async () => {
         await this.instance.addVoter(voter1)
         await this.instance.addVoter(voter2)
 
@@ -84,5 +106,23 @@ contract("Proposals registration", async accounts => {
         });
     });
 
-    // Todo add tests for endProposalSession
+    it.only("Can end registration session only by admin (owner of contract) and with enough proposals.", async () => {
+        await this.instance.addVoter(voter1)
+        await this.instance.addVoter(voter2)
+
+        this.instance.startProposalSession();
+
+        await this.instance.submitProposal("13ème mois obligatoire.", { from: voter1 });
+        await this.instance.submitProposal("Tickets resto à 20 euros.", { from: voter1 });
+
+        const receipt = await this.instance.endProposalSession();
+
+        expectEvent(receipt, 'WorkflowStatusChange', {
+            previousStatus: new BN(1),
+            newStatus: new BN(2)
+        });
+
+        const state = await this.instance.state();
+        assert.equal(state, 2);
+    });
 });
