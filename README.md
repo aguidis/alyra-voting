@@ -3,10 +3,10 @@
 Le smart contract de vote est conçu pour une petite organisation dont les électeurs, définis en amont, sont inscrits sur une liste blanche (whitelist) grâce à leur adresse Ethereum.
 Ils peuvent soumettre de nouvelles propositions lors d'une session d'enregistrement des propositions, et peuvent voter sur les propositions lors de la session de vote.
 
-- ✔️ Le vote n'est pas secret
-- ✔️ Chaque électeur peut voir les votes des autres
-- ✔️ Le gagnant est déterminé à la majorité simple
-- ✔️ La proposition qui obtient le plus de voix l'emporte.
+- Le vote n'est pas secret
+- Chaque électeur peut voir les votes des autres
+- Le gagnant est déterminé à la majorité simple
+- La proposition qui obtient le plus de voix l'emporte.
 
 ## Stack
 
@@ -26,15 +26,15 @@ Ils peuvent soumettre de nouvelles propositions lors d'une session d'enregistrem
 
 - ✅ L'administrateur de vote met fin à la session d'enregistrement des propositions.
 
-- ❌ L'administrateur du vote commence la session de vote.
+- ✅ L'administrateur du vote commence la session de vote.
 
-- ❌ Les électeurs inscrits votent pour leurs propositions préférées.
+- ✅ Les électeurs inscrits votent pour leurs propositions préférées.
 
-- ❌ L'administrateur du vote met fin à la session de vote.
+- ✅ L'administrateur du vote met fin à la session de vote.
 
-- ❌ L'administrateur du vote comptabilise les votes.
+- ✅ L'administrateur du vote comptabilise les votes.
 
-- ❌ Tout le monde peut vérifier les derniers détails de la proposition gagnante.
+- ✅ Tout le monde peut vérifier les derniers détails de la proposition gagnante.
 
 ## Questions
 
@@ -42,4 +42,5 @@ Ils peuvent soumettre de nouvelles propositions lors d'une session d'enregistrem
 
 ## TODO
 
-- créer des tests https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-solidity
+- test/04-voting-session.js
+- test/05-votes-tallying.js
