@@ -7,21 +7,19 @@ const {
 const Voting = artifacts.require("Voting");
 
 contract("Proposals registration", async accounts => {
-    beforeEach(async () => {
-        this.instance = await Voting.new();
-    });
-
-    const randomUser = accounts[9];
-
     const voter1 = accounts[1];
     const voter2 = accounts[2];
     const voter3 = accounts[3];
     const voter4 = accounts[4];
 
-    it("Can start registration session only by admin (owner of contract) and with enough voters.", async () => {
+    beforeEach(async () => {
+        this.instance = await Voting.new();
+
         await this.instance.addVoter(voter1)
         await this.instance.addVoter(voter2)
+    });
 
+    it("Can start registration session only by admin (owner of contract) and with enough voters.", async () => {
         const receipt = await this.instance.startProposalSession();
 
         expectEvent(receipt, 'WorkflowStatusChange', {
@@ -33,14 +31,11 @@ contract("Proposals registration", async accounts => {
         assert.equal(state, 1);
     });
 
-    it("Should not be able to start as non admin.", async () => {
-        await expectRevert(this.instance.startProposalSession({ from: randomUser }), "Ownable: caller is not the owner");
+    it("Should not be able to start registration session as non admin.", async () => {
+        await expectRevert(this.instance.startProposalSession({ from: voter1 }), "Ownable: caller is not the owner");
     });
 
     it("Can submit proposal only by registred voter.", async () => {
-        await this.instance.addVoter(voter1)
-        await this.instance.addVoter(voter2)
-
         this.instance.startProposalSession();
 
         await this.instance.submitProposal("13ème mois obligatoire.", { from: voter1 });
@@ -53,9 +48,6 @@ contract("Proposals registration", async accounts => {
     });
 
     it("Should not be able to add empty proposal.", async () => {
-        await this.instance.addVoter(voter1)
-        await this.instance.addVoter(voter2)
-
         await this.instance.startProposalSession();
 
         await expectRevert(
@@ -65,9 +57,6 @@ contract("Proposals registration", async accounts => {
     })
 
     it("Should not be able to add proposals if proposals registration ended.", async () => {
-        await this.instance.addVoter(voter1)
-        await this.instance.addVoter(voter2)
-
         await this.instance.startProposalSession()
 
         await this.instance.submitProposal("13ème mois obligatoire.", { from: voter1 });
@@ -82,9 +71,6 @@ contract("Proposals registration", async accounts => {
     })
 
     it("Should not be able to submit proposal if participant not registred as voter.", async () => {
-        await this.instance.addVoter(voter1)
-        await this.instance.addVoter(voter2)
-
         await this.instance.startProposalSession()
 
         await expectRevert(
@@ -94,9 +80,6 @@ contract("Proposals registration", async accounts => {
     });
 
     it("Should fire 'ProposalRegistered' event after registration.", async () => {
-        await this.instance.addVoter(voter1)
-        await this.instance.addVoter(voter2)
-
         await this.instance.startProposalSession()
 
         const receipt = await this.instance.submitProposal("13ème mois obligatoire.", { from: voter1 });
@@ -106,10 +89,7 @@ contract("Proposals registration", async accounts => {
         });
     });
 
-    it.only("Can end registration session only by admin (owner of contract) and with enough proposals.", async () => {
-        await this.instance.addVoter(voter1)
-        await this.instance.addVoter(voter2)
-
+    it("Can end registration session only by admin (owner of contract) and with enough proposals.", async () => {
         this.instance.startProposalSession();
 
         await this.instance.submitProposal("13ème mois obligatoire.", { from: voter1 });

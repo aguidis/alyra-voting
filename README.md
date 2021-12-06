@@ -42,5 +42,4 @@ Ils peuvent soumettre de nouvelles propositions lors d'une session d'enregistrem
 
 ## TODO
 
-- test/04-voting-session.js
 - test/05-votes-tallying.js

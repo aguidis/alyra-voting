@@ -10,8 +10,6 @@ contract("Voters registration", async accounts => {
         this.instance = await Voting.new();
     });
 
-    const randomUser = accounts[9];
-
     const voter1 = accounts[1];
     const voter2 = accounts[2];
     const voter3 = accounts[3];
@@ -42,7 +40,7 @@ contract("Voters registration", async accounts => {
 
     it("Should not be able to add new voter to the whitelist as non admin.", async () => {
         await expectRevert(
-            this.instance.addVoter(voter1, { from: randomUser }),
+            this.instance.addVoter(voter1, { from: voter2 }),
             "Ownable: caller is not the owner"
         );
     });

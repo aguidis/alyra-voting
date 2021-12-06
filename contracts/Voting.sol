@@ -3,15 +3,6 @@ pragma solidity ^0.8.10;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-// let instance = await Voting.deployed();
-// instance.addVoter(accounts[1]);instance.addVoter(accounts[2]);instance.addVoter(accounts[3]);
-// instance.getWhitelistedVoters();
-// instance.startProposalSession();
-// instance.submitProposal("coucou 1", {from: accounts[1]});
-// instance.submitProposal("coucou 2", {from: accounts[2]});
-// instance.submitProposal("coucou 3", {from: accounts[3]});
-// instance.endProposalSession();
-
 contract Voting is Ownable {
     event VoterRegistered(address voterAddress);
     event WorkflowStatusChange(
@@ -146,7 +137,7 @@ contract Voting is Ownable {
     function voteForProposal(uint256 _proposalId) public {
         require(
             state == WorkflowStatus.VotingSessionStarted,
-            "You can no longer vote for proposal."
+            "You can no longer vote for a proposal."
         );
 
         Voter storage currentVoter = addressToVoter[msg.sender];
@@ -156,10 +147,7 @@ contract Voting is Ownable {
             "You are not registered for voting."
         );
 
-        require(
-            currentVoter.hasVoted == false,
-            "You are not registered for voting."
-        );
+        require(currentVoter.hasVoted == false, "You cannot vote twice.");
 
         Proposal storage votedProposal = proposals[_proposalId];
 
