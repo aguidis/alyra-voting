@@ -14,8 +14,6 @@ contract("Votes tallying", async accounts => {
     const voter5 = accounts[5];
     const voter6 = accounts[6];
 
-    const unregistredVoter = accounts[7];
-
     beforeEach(async () => {
         this.instance = await Voting.new();
 
@@ -35,6 +33,38 @@ contract("Votes tallying", async accounts => {
         await this.instance.endProposalSession();
 
         await this.instance.startVotingSession();
+
+        await this.instance.voteForProposal(0, { from: voter1 });
+        await this.instance.voteForProposal(0, { from: voter2 });
+        await this.instance.voteForProposal(1, { from: voter3 });
+        await this.instance.voteForProposal(0, { from: voter4 });
+        await this.instance.voteForProposal(2, { from: voter5 });
+        await this.instance.voteForProposal(2, { from: voter6 });
     });
 
+    it("Can start tallying votes only by admin (owner of contract).", async () => {
+        await this.instance.endVotingSession();
+
+        const receipt = await this.instance.tallyingVotes();
+
+        expectEvent(receipt, 'WorkflowStatusChange', {
+            previousStatus: new BN(4),
+            newStatus: new BN(5)
+        });
+
+        const state = await this.instance.state();
+        assert.equal(state, 5);
+
+        const winner = await this.instance.getWinner();
+
+        assert.equal(winner.description, "13ème mois obligatoire.");
+        assert.equal(winner.voteCount, 3);
+    });
+
+    it("Should not be able to start tallying votes if voting session is in progress.", async () => {
+        await expectRevert(
+            this.instance.tallyingVotes(),
+            "You can start yet tailling the votes."
+        );
+    });
 });

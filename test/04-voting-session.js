@@ -95,7 +95,7 @@ contract("Voting session", async accounts => {
         );
     });
 
-    it("Should fire 'VoterRegistered' event after registration.", async () => {
+    it("Should fire 'Voted' event after registration.", async () => {
         await this.instance.startVotingSession();
 
         const receipt = await this.instance.voteForProposal(0, { from: voter1 });
@@ -122,5 +122,14 @@ contract("Voting session", async accounts => {
 
         const state = await this.instance.state();
         assert.equal(state, 4);
+    });
+
+    it("Should not be able to end voting session without a vote", async () => {
+        await this.instance.startVotingSession();
+
+        await expectRevert(
+            this.instance.endVotingSession(),
+            "Nobody has voted yet."
+        );
     });
 });

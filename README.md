@@ -42,4 +42,4 @@ Ils peuvent soumettre de nouvelles propositions lors d'une session d'enregistrem
 
 ## TODO
 
-- test/05-votes-tallying.js
+- tester les requires de getVoterVote()

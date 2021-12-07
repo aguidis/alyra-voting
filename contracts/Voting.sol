@@ -177,18 +177,19 @@ contract Voting is Ownable {
     function tallyingVotes() public onlyOwner {
         require(
             state == WorkflowStatus.VotingSessionEnded,
-            "You can no longer tailling the votes."
+            "You can start yet tailling the votes."
         );
 
         for (uint256 i = 0; i < proposals.length; i++) {
-            Proposal memory currentProposal = proposals[i];
+            Proposal storage currentProposal = proposals[i];
 
-            if (winningProposalId == 0) {
+            if (i == 0) {
                 winningProposalId = i;
+
                 continue;
             }
 
-            Proposal memory tempWinningProposal = proposals[winningProposalId];
+            Proposal storage tempWinningProposal = proposals[winningProposalId];
 
             if (currentProposal.voteCount > tempWinningProposal.voteCount) {
                 winningProposalId = i;
@@ -218,7 +219,7 @@ contract Voting is Ownable {
         );
 
         require(
-            addressToVoter[msg.sender].hasVoted == true,
+            addressToVoter[voterAddress].hasVoted == true,
             "Vote not submitted yet."
         );
 
