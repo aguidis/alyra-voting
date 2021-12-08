@@ -18,28 +18,12 @@ Ils peuvent soumettre de nouvelles propositions lors d'une session d'enregistrem
 
 ## Le processus de vote
 
-- ✅ L'administrateur du vote enregistre une liste blanche d'électeurs identifiés par leur adresse Ethereum
-
-- ✅ L'administrateur du vote commence la session d'enregistrement de la proposition.
-
-- ✅ Les électeurs inscrits sont autorisés à enregistrer leurs propositions pendant que la session d'enregistrement est active.
-
-- ✅ L'administrateur de vote met fin à la session d'enregistrement des propositions.
-
-- ✅ L'administrateur du vote commence la session de vote.
-
-- ✅ Les électeurs inscrits votent pour leurs propositions préférées.
-
-- ✅ L'administrateur du vote met fin à la session de vote.
-
-- ✅ L'administrateur du vote comptabilise les votes.
-
-- ✅ Tout le monde peut vérifier les derniers détails de la proposition gagnante.
-
-## Questions
-
-- S'il n'y a pas de gagnant ? (égalité)
-
-## TODO
-
-- Improve smartcontract code
+- L'administrateur du vote enregistre une liste blanche d'électeurs identifiés par leur adresse Ethereum
+- L'administrateur du vote commence la session d'enregistrement de la proposition.
+- Les électeurs inscrits sont autorisés à enregistrer leurs propositions pendant que la session d'enregistrement est active.
+- L'administrateur de vote met fin à la session d'enregistrement des propositions.
+- L'administrateur du vote commence la session de vote.
+- Les électeurs inscrits votent pour leurs propositions préférées.
+- L'administrateur du vote met fin à la session de vote.
+- L'administrateur du vote comptabilise les votes.
+- le monde peut vérifier les derniers détails de la proposition gagnante.
