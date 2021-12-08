@@ -1,12 +1,10 @@
 const {
-    BN,
-    expectEvent,
     expectRevert
 } = require("@openzeppelin/test-helpers");
 
 const Voting = artifacts.require("Voting");
 
-contract("Votes tallying", async accounts => {
+contract("Vote result", async accounts => {
     const voter1 = accounts[1];
     const voter2 = accounts[2];
     const voter3 = accounts[3];
@@ -44,11 +42,11 @@ contract("Votes tallying", async accounts => {
         await this.instance.voteForProposal(2, { from: voter6 });
 
         await this.instance.endVotingSession();
-
-        await this.instance.tallyingVotes();
     });
 
     it("Can see others voters votes only by registred voter.", async () => {
+        await this.instance.tallyingVotes();
+
         const voter2VotedProposal = await this.instance.getVoterVote(voter2, { from: voter1 });
         assert.equal(voter2VotedProposal, 0);
 
@@ -65,7 +63,9 @@ contract("Votes tallying", async accounts => {
         assert.equal(voter6VotedProposal, 2);
     });
 
-    it.only("Can see winning proposal details only by registred voter.", async () => {
+    it("Can see winning proposal details only by registred voter.", async () => {
+        await this.instance.tallyingVotes();
+
         let winner = await this.instance.getWinner({ from: voter1 });
 
         assert.equal(winner.description, "13ème mois obligatoire.");
@@ -95,5 +95,21 @@ contract("Votes tallying", async accounts => {
 
         assert.equal(winner.description, "13ème mois obligatoire.");
         assert.equal(winner.voteCount, 3);
+    });
+
+    it("Should not be able to see winning proposal details if votes has not been tallied.", async () => {
+        await expectRevert(
+            this.instance.getWinner({ from: voter1 }),
+            "The winning proposal is not defined yet."
+        );
+    });
+
+    it("Should not be able to see winning proposal details by unregistred voter.", async () => {
+        await this.instance.tallyingVotes();
+
+        await expectRevert(
+            this.instance.getWinner({ from: unregistredVoter }),
+            "Access denied because participant does not belong to registered voters."
+        );
     });
 });

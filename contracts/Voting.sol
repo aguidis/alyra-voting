@@ -249,6 +249,12 @@ contract Voting is Ownable {
             "There is an equality between some proposals."
         );
 
+        require(
+            owner() == _msgSender() ||
+                addressToVoter[msg.sender].isRegistered == true,
+            "Access denied because participant does not belong to registered voters."
+        );
+
         return proposals[winningProposalId];
     }
 }

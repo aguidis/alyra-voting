@@ -42,4 +42,4 @@ Ils peuvent soumettre de nouvelles propositions lors d'une session d'enregistrem
 
 ## TODO
 
-- tester les requires de getVoterVote()
+- Improve smartcontract code
