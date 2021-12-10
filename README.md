@@ -6,7 +6,7 @@ Ils peuvent soumettre de nouvelles propositions lors d'une session d'enregistrem
 - Le vote n'est pas secret
 - Chaque électeur peut voir les votes des autres
 - Le gagnant est déterminé à la majorité simple
-- La proposition qui obtient le plus de voix l'emporte.
+- La proposition qui obtient le plus de voix l'emporte
 
 ## Stack
 
@@ -19,11 +19,23 @@ Ils peuvent soumettre de nouvelles propositions lors d'une session d'enregistrem
 ## Le processus de vote
 
 - L'administrateur du vote enregistre une liste blanche d'électeurs identifiés par leur adresse Ethereum
-- L'administrateur du vote commence la session d'enregistrement de la proposition.
-- Les électeurs inscrits sont autorisés à enregistrer leurs propositions pendant que la session d'enregistrement est active.
-- L'administrateur de vote met fin à la session d'enregistrement des propositions.
-- L'administrateur du vote commence la session de vote.
-- Les électeurs inscrits votent pour leurs propositions préférées.
-- L'administrateur du vote met fin à la session de vote.
-- L'administrateur du vote comptabilise les votes.
-- le monde peut vérifier les derniers détails de la proposition gagnante.
+- L'administrateur du vote commence la session d'enregistrement de la proposition
+- Les électeurs inscrits sont autorisés à enregistrer leurs propositions pendant que la session d'enregistrement est active
+- L'administrateur de vote met fin à la session d'enregistrement des propositions
+- L'administrateur du vote commence la session de vote
+- Les électeurs inscrits votent pour leurs propositions préférées
+- L'administrateur du vote met fin à la session de vote
+- L'administrateur du vote comptabilise les votes
+- le monde peut vérifier les derniers détails de la proposition gagnante
+
+## Tests
+
+L'ensemble des tests ont été répartis dans des fichiers dédiés avec un préfixe symbolisant l'étape du processus du vote en cours. Afin de faciliter la lecture, chaque fichier de test reflète une étape du processus de vote décris dans la partie précédente.
+
+Dans la mesure du possible, les scénarios suivants sont vérifiés pour chaque étape :
+
+- Vérification du `sender` quand une fonction est censée être appelée par l'administrateur ou un participant censé être enregistré
+- Vérification du state en cours avant d'exécuter une action pouvant altérer l'état du contrat
+- Vérification des inputs
+- Vérification des exceptions lorsque les contraintes de validation ne sont pas respectées
+- Vérification des variables d'état suite à l'appel de fonction ayant altéré le contrat
