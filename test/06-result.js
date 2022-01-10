@@ -103,13 +103,4 @@ contract("Vote result", async accounts => {
             "The winning proposal is not defined yet."
         );
     });
-
-    it("Should not be able to see winning proposal details by unregistred voter.", async () => {
-        await this.instance.tallyingVotes();
-
-        await expectRevert(
-            this.instance.getWinner({ from: unregistredVoter }),
-            "Access denied because participant does not belong to registered voters."
-        );
-    });
 });

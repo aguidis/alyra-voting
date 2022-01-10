@@ -3,7 +3,34 @@ pragma solidity ^0.8.10;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+/// @title A "one shot" voting contract
+/// @author Adrien G
+/// @notice You can use this contract for test purposes only
+/// @dev All function calls are currently implemented without side effects
+/// @custom:educational This is an educational contract.
 contract Voting is Ownable {
+    struct Voter {
+        bool isRegistered;
+        bool hasVoted;
+        uint256 votedProposalId;
+    }
+
+    struct Proposal {
+        string description;
+        uint256 voteCount;
+    }
+
+    WorkflowStatus public state;
+
+    address[] private whiteListedVoters;
+    mapping(address => Voter) private addressToVoter;
+
+    Proposal[] private proposals;
+
+    uint256 public totalVotes;
+    uint256 public winningProposalId;
+    uint256[] public proposalVoteCountEqualities;
+
     event VoterRegistered(address voterAddress);
     event WorkflowStatusChange(
         WorkflowStatus previousStatus,
@@ -21,30 +48,80 @@ contract Voting is Ownable {
         VotesTallied
     }
 
-    struct Voter {
-        bool isRegistered;
-        bool hasVoted;
-        uint256 votedProposalId;
-    }
-
-    struct Proposal {
-        string description;
-        uint256 voteCount;
-    }
-
-    uint256 public totalVotes;
-    uint256 public winningProposalId;
-    uint256[] public proposalVoteCountEqualities;
-
-    WorkflowStatus public state;
-
-    address[] private whiteListedVoters;
-    mapping(address => Voter) private addressToVoter;
-
-    Proposal[] private proposals;
-
     constructor() {
         state = WorkflowStatus.RegisteringVoters;
+    }
+
+    /// @notice Return the complete list of registred voter addresses
+    function getWhitelistedVoters() public view returns (address[] memory) {
+        return whiteListedVoters;
+    }
+
+    /// @notice Return the voter details
+    /// @param voterAddress The desired voter address
+    function getVoterDetails(address voterAddress)
+        public
+        view
+        returns (Voter memory)
+    {
+        return addressToVoter[voterAddress];
+    }
+
+    /// @notice Return a voter vote
+    /// @param voterAddress The desired voter address
+    /// @return Proposal id
+    function getVoterVote(address voterAddress) public view returns (uint256) {
+        require(
+            addressToVoter[voterAddress].isRegistered,
+            "This address does not belong to registered voters."
+        );
+
+        require(
+            addressToVoter[voterAddress].hasVoted,
+            "Vote not submitted yet."
+        );
+
+        return addressToVoter[voterAddress].votedProposalId;
+    }
+
+    /// @notice Return the complete list of proposals
+    function getProposals() public view returns (Proposal[] memory) {
+        return proposals;
+    }
+
+    /// @notice Return proposal details
+    /// @param _proposalId The desired proposal identifier
+    function getProposalDetails(uint256 _proposalId)
+        public
+        view
+        returns (Proposal memory)
+    {
+        return proposals[_proposalId];
+    }
+
+    /// @notice Return proposal ids where vote count is the same than the winner
+    /// @dev if the array is not empty, it means there an equality after the vote tallying
+    function getProposalVoteCountEqualities()
+        public
+        view
+        returns (uint256[] memory)
+    {
+        return proposalVoteCountEqualities;
+    }
+
+    /// @notice Return winning proposal details
+    function getWinner() public view returns (Proposal memory) {
+        require(
+            state == WorkflowStatus.VotesTallied,
+            "The winning proposal is not defined yet."
+        );
+
+        require(
+            proposalVoteCountEqualities.length == 0,
+            "There is an equality between some proposals."
+        );
+
+        return proposals[winningProposalId];
     }
 
     function addVoter(address _voterAddress) public onlyOwner {
@@ -64,7 +141,7 @@ contract Voting is Ownable {
         );
 
         whiteListedVoters.push(_voterAddress);
-        addressToVoter[_voterAddress] = Voter(true, false, 0);
+        addressToVoter[_voterAddress].isRegistered = true;
 
         emit VoterRegistered(_voterAddress);
     }
@@ -89,7 +166,7 @@ contract Voting is Ownable {
         );
 
         require(
-            addressToVoter[msg.sender].isRegistered == true,
+            addressToVoter[msg.sender].isRegistered,
             "Submit denied because participant does not belong to registered voters."
         );
 
@@ -143,7 +220,7 @@ contract Voting is Ownable {
         Voter storage currentVoter = addressToVoter[msg.sender];
 
         require(
-            currentVoter.isRegistered == true,
+            currentVoter.isRegistered,
             "You are not registered for voting."
         );
 
@@ -155,6 +232,24 @@ contract Voting is Ownable {
         currentVoter.hasVoted = true;
 
         votedProposal.voteCount++;
+
+        Proposal storage tempWinningProposal = proposals[winningProposalId];
+
+        // Edge case for first vote
+        if (totalVotes == 0) {
+            winningProposalId = _proposalId;
+        } else if (votedProposal.voteCount > tempWinningProposal.voteCount) {
+            winningProposalId = _proposalId;
+
+            delete proposalVoteCountEqualities;
+        } else if (
+            _proposalId != winningProposalId &&
+            votedProposal.voteCount == tempWinningProposal.voteCount
+        ) {
+            // Handle potental vote equality
+            proposalVoteCountEqualities.push(winningProposalId);
+        }
+
         totalVotes++;
 
         emit Voted(msg.sender, _proposalId);
@@ -174,87 +269,16 @@ contract Voting is Ownable {
         emit WorkflowStatusChange(oldStatus, state);
     }
 
+    // Determiner le gagnant au moment du vote
     function tallyingVotes() public onlyOwner {
         require(
             state == WorkflowStatus.VotingSessionEnded,
             "You can start yet tailling the votes."
         );
 
-        for (uint256 i = 0; i < proposals.length; i++) {
-            Proposal storage currentProposal = proposals[i];
-
-            if (i == 0) {
-                winningProposalId = i;
-
-                continue;
-            }
-
-            Proposal storage tempWinningProposal = proposals[winningProposalId];
-
-            if (currentProposal.voteCount > tempWinningProposal.voteCount) {
-                winningProposalId = i;
-
-                delete proposalVoteCountEqualities;
-            }
-
-            if (currentProposal.voteCount == tempWinningProposal.voteCount) {
-                proposalVoteCountEqualities.push(i);
-            }
-        }
-
         WorkflowStatus oldStatus = state;
         state = WorkflowStatus.VotesTallied;
 
         emit WorkflowStatusChange(oldStatus, state);
-    }
-
-    function getWhitelistedVoters() public view returns (address[] memory) {
-        return whiteListedVoters;
-    }
-
-    function getVoterVote(address voterAddress) public view returns (uint256) {
-        require(
-            addressToVoter[msg.sender].isRegistered == true,
-            "This address does not belong to registered voters."
-        );
-
-        require(
-            addressToVoter[voterAddress].hasVoted == true,
-            "Vote not submitted yet."
-        );
-
-        return addressToVoter[voterAddress].votedProposalId;
-    }
-
-    function getProposals() public view returns (Proposal[] memory) {
-        return proposals;
-    }
-
-    function getProposalDetails(uint256 _proposalId)
-        public
-        view
-        returns (Proposal memory)
-    {
-        return proposals[_proposalId];
-    }
-
-    function getWinner() public view returns (Proposal memory) {
-        require(
-            state == WorkflowStatus.VotesTallied,
-            "The winning proposal is not defined yet."
-        );
-
-        require(
-            proposalVoteCountEqualities.length == 0,
-            "There is an equality between some proposals."
-        );
-
-        require(
-            owner() == _msgSender() ||
-                addressToVoter[msg.sender].isRegistered == true,
-            "Access denied because participant does not belong to registered voters."
-        );
-
-        return proposals[winningProposalId];
     }
 }
