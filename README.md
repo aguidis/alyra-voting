@@ -1,12 +1,12 @@
-# Système de vote
+# Voting system
 
-Le smart contract de vote est conçu pour une petite organisation dont les électeurs, définis en amont, sont inscrits sur une liste blanche (whitelist) grâce à leur adresse Ethereum.
-Ils peuvent soumettre de nouvelles propositions lors d'une session d'enregistrement des propositions, et peuvent voter sur les propositions lors de la session de vote.
+The smart contract voting system is designed for a small organization whose voters, defined beforehand, are registered on a whitelist thanks to their Ethereum address.
+They can submit new proposals during a proposal registration session, and can vote on the proposals during the voting session.
 
-- Le vote n'est pas secret
-- Chaque électeur peut voir les votes des autres
-- Le gagnant est déterminé à la majorité simple
-- La proposition qui obtient le plus de voix l'emporte
+- Voting is not secret
+- Each voter can see the votes of others
+- The winner is determined by a simple majority
+- The proposal with the most votes wins
 
 ## Stack
 
@@ -16,26 +16,26 @@ Ils peuvent soumettre de nouvelles propositions lors d'une session d'enregistrem
 - Node v15.5.0
 - Web3.js v1.5.3
 
-## Le processus de vote
+## The voting process
 
-- L'administrateur du vote enregistre une liste blanche d'électeurs identifiés par leur adresse Ethereum
-- L'administrateur du vote commence la session d'enregistrement de la proposition
-- Les électeurs inscrits sont autorisés à enregistrer leurs propositions pendant que la session d'enregistrement est active
-- L'administrateur de vote met fin à la session d'enregistrement des propositions
-- L'administrateur du vote commence la session de vote
-- Les électeurs inscrits votent pour leurs propositions préférées
-- L'administrateur du vote met fin à la session de vote
-- L'administrateur du vote comptabilise les votes
-- le monde peut vérifier les derniers détails de la proposition gagnante
+- The voting administrator registers a white list of voters identified by their Ethereum address
+- The voting administrator starts the proposal registration session
+- Registered voters are allowed to register their proposals while the registration session is active
+- Voting administrator ends proposal registration session
+- Voting administrator begins the voting session
+- Registered voters vote for their preferred proposals
+- Voting administrator ends voting session
+- Voting administrator tally votes
+- World can check the final details of the winning proposal
 
 ## Tests
 
-L'ensemble des tests ont été répartis dans des fichiers dédiés avec un préfixe symbolisant l'étape du processus du vote en cours. Afin de faciliter la lecture, chaque fichier de test reflète une étape du processus de vote décris dans la partie précédente.
+All the tests have been divided into dedicated files with a prefix symbolizing the stage of the voting process in progress. For ease of reading, each test file reflects a stage of the voting process described in the previous section.
 
-Dans la mesure du possible, les scénarios suivants sont vérifiés pour chaque étape :
+As far as possible, the following scenarios are checked for each step:
 
-- Vérification du `sender` quand une fonction est censée être appelée par l'administrateur ou un participant censé être enregistré
-- Vérification du state en cours avant d'exécuter une action pouvant altérer l'état du contrat
-- Vérification des inputs
-- Vérification des exceptions lorsque les contraintes de validation ne sont pas respectées
-- Vérification des variables d'état suite à l'appel de fonction ayant altéré le contrat
+- Checking the `sender` when a function is supposed to be called by the administrator or a participant supposed to be registered
+- Checking the current state before executing an action that could alter the state of the contract
+- Checking inputs
+- Checking exceptions when validation constraints are not respected
+- Verification of state variables following a function call that has altered the contract
